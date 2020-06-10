@@ -1,12 +1,14 @@
 const express = require('express');
-const router = express.Router({mergeParams: true}); // permite leer los parametros que recibe en app.use de app.js
+const router = express.Router();
 
-router.get('/', (req, res, next) =>{
-  res.send({"name":"Orlando", "lastName": "Jimenez"});
+/* GET /profile */
+router.get('/', (req, res, next) => {
+  res.send('GET /profile');
 });
 
-router.get('/:id', (req, res, next) =>{
-  res.send("profiles/:id");
+/* PUT /profile/:user_id */
+router.put('/profile/:user_id', (req, res, next) => {
+  res.send('PUT /profile/:user_id');
 });
 
 module.exports = router;

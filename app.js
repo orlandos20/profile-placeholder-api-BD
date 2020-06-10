@@ -4,11 +4,28 @@ const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const passport  = require('passport');
+const User = require('./components/user/userModel');
+const session = require('express-session');
+const mongoose = require('mongoose');
 
-const index = require('./routes/index');
+
+// Require Routes
+const user = require('./routes/userRoutes');
 const profile = require('./routes/profileRoutes');
 
 const app = express();
+mongoose.connect('mongodb://localhost:27017/test', 
+{useNewUrlParser: true, useUnifiedTopology: true}, (err, res) => {
+  if(err) return console.log("error al conectar a la base de datos ", err);
+  console.log("Conexión con la base de datos establecida...");
+});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log("we're connected! ");
+});
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
@@ -22,7 +39,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+// Configure Passport and Sessions
+app.use(session({
+  secret: '123',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
+
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use('/', user);
 app.use('/profile', profile);
 
 // catch 404 and forward to error handler
